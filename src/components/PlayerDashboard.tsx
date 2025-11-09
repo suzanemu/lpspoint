@@ -100,7 +100,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
 
     const { data, error } = await supabase
       .from("match_screenshots")
-      .select("*, teams!inner(name, logo_url)")
+      .select("id, screenshot_url, match_number, day, placement, kills, points, teams!inner(name, logo_url)")
       .in("team_id", teamIds)
       .order("created_at", { ascending: false });
 

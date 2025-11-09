@@ -30,6 +30,7 @@ interface TeamResult {
 export default function ManualPointEntry({ selectedTournament }: ManualPointEntryProps) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [matchNumber, setMatchNumber] = useState("1");
+  const [day, setDay] = useState("1");
   const [loading, setLoading] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState("");
   const [placement, setPlacement] = useState("");
@@ -114,7 +115,7 @@ export default function ManualPointEntry({ selectedTournament }: ManualPointEntr
       const matchData = addedResults.map(result => ({
         team_id: result.teamId,
         match_number: parseInt(matchNumber),
-        day: parseInt(matchNumber),
+        day: parseInt(day),
         placement: result.placement,
         kills: result.kills,
         points: result.points,
@@ -149,15 +150,27 @@ export default function ManualPointEntry({ selectedTournament }: ManualPointEntr
       </h2>
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Match Number</Label>
-          <Input
-            type="number"
-            min="1"
-            value={matchNumber}
-            onChange={(e) => setMatchNumber(e.target.value)}
-            className="bg-input border-border max-w-xs"
-          />
+        <div className="grid grid-cols-2 gap-4 max-w-md">
+          <div className="space-y-2">
+            <Label>Match Number</Label>
+            <Input
+              type="number"
+              min="1"
+              value={matchNumber}
+              onChange={(e) => setMatchNumber(e.target.value)}
+              className="bg-input border-border"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Day</Label>
+            <Input
+              type="number"
+              min="1"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              className="bg-input border-border"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

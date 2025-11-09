@@ -193,7 +193,7 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
 
           <TabsContent value="screenshots" className="mt-6">
             {selectedTournament ? (
-              <TeamScreenshotExplorer selectedTournament={selectedTournament} />
+              <TeamScreenshotExplorer selectedTournament={selectedTournament} userId={userId} />
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <p>Please select a tournament first.</p>
