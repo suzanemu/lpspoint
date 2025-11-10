@@ -4,7 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Image, Trash2, AlertCircle, ChevronDown, ChevronRight, FolderOpen, Folder } from "lucide-react";
+import { Image, Trash2, AlertCircle, ChevronDown, ChevronRight, FolderOpen, Folder, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { calculatePoints } from "@/types/tournament";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,12 +49,27 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
   const [selectedImage, setSelectedImage] = useState<Screenshot | null>(null);
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+  const [editingScreenshot, setEditingScreenshot] = useState<Screenshot | null>(null);
+  const [editPlacement, setEditPlacement] = useState<number>(0);
+  const [editKills, setEditKills] = useState<number>(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    checkAdminStatus();
     if (selectedTournament) {
       fetchScreenshots();
     }
-  }, [selectedTournament]);
+  }, [selectedTournament, userId]);
+
+  const checkAdminStatus = async () => {
+    const { data } = await supabase
+      .from("sessions")
+      .select("role")
+      .eq("user_id", userId)
+      .single();
+    
+    setIsAdmin(data?.role === "admin");
+  };
 
   const fetchScreenshots = async () => {
     setLoading(true);
@@ -115,6 +133,36 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
 
   const toggleTeam = (key: string) => {
     setExpandedTeams(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleEditClick = (screenshot: Screenshot) => {
+    setEditingScreenshot(screenshot);
+    setEditPlacement(screenshot.placement || 0);
+    setEditKills(screenshot.kills || 0);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingScreenshot) return;
+
+    const newPoints = calculatePoints(editPlacement, editKills);
+
+    const { error } = await supabase
+      .from("match_screenshots")
+      .update({
+        placement: editPlacement,
+        kills: editKills,
+        points: newPoints,
+      })
+      .eq("id", editingScreenshot.id);
+
+    if (error) {
+      console.error("Error updating screenshot:", error);
+      toast.error("Failed to update screenshot");
+    } else {
+      toast.success("Screenshot updated successfully");
+      fetchScreenshots();
+      setEditingScreenshot(null);
+    }
   };
 
   if (loading) {
@@ -215,15 +263,28 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                                     <p className="font-bold text-primary">{screenshot.points} pts</p>
                                   )}
                                 </div>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  className="w-full mt-2"
-                                  onClick={() => setDeleteId(screenshot.id)}
-                                >
-                                  <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete
-                                </Button>
+                                {isAdmin && (
+                                  <div className="flex gap-2 mt-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex-1"
+                                      onClick={() => handleEditClick(screenshot)}
+                                    >
+                                      <Edit className="h-3 w-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      className="flex-1"
+                                      onClick={() => setDeleteId(screenshot.id)}
+                                    >
+                                      <Trash2 className="h-3 w-3 mr-1" />
+                                      Delete
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -281,6 +342,53 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
               alt={`Match ${selectedImage.match_number}`}
               className="w-full h-auto rounded-lg"
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingScreenshot} onOpenChange={() => setEditingScreenshot(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Screenshot Data</DialogTitle>
+          </DialogHeader>
+          {editingScreenshot && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="placement">Placement</Label>
+                <Input
+                  id="placement"
+                  type="number"
+                  min="1"
+                  max="32"
+                  value={editPlacement}
+                  onChange={(e) => setEditPlacement(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="kills">Kills</Label>
+                <Input
+                  id="kills"
+                  type="number"
+                  min="0"
+                  value={editKills}
+                  onChange={(e) => setEditKills(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="p-3 bg-secondary rounded-lg">
+                <p className="text-sm text-muted-foreground">Calculated Points:</p>
+                <p className="text-2xl font-bold text-primary">
+                  {calculatePoints(editPlacement, editKills)} pts
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleEditSave} className="flex-1">
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => setEditingScreenshot(null)} className="flex-1">
+                  Cancel
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
