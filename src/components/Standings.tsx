@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Trophy } from "lucide-react";
 import { Team } from "@/types/tournament";
 
 interface StandingsProps {
@@ -46,9 +46,12 @@ const Standings = ({ teams, isAdmin = false, tournamentName = "Tournament" }: St
   };
 
   return (
-    <div className="border-primary/30 bg-card/95 rounded-lg p-6">
+    <div className="bg-[hsl(220_20%_12%)] rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Tournament Standings</h2>
+        <div>
+          <h3 className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Season 1</h3>
+          <h2 className="text-4xl font-bold text-primary uppercase tracking-wider">Overall Standings</h2>
+        </div>
         {isAdmin && (
           <Button onClick={downloadCSV} variant="outline" className="border-primary/50">
             <Download className="mr-2 h-4 w-4" />
@@ -56,29 +59,68 @@ const Standings = ({ teams, isAdmin = false, tournamentName = "Tournament" }: St
           </Button>
         )}
       </div>
+      
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full border-separate border-spacing-y-1">
           <thead>
-            <tr className="border-b border-primary/30">
-              <th className="text-left p-3">#</th>
-              <th className="text-left p-3">Team</th>
-              <th className="text-right p-3">Points</th>
-              <th className="text-right p-3">Kills</th>
-              <th className="text-right p-3">Matches</th>
-              <th className="text-right p-3">Wins</th>
+            <tr className="bg-primary">
+              <th className="text-left p-3 font-bold text-primary-foreground uppercase text-sm rounded-l-lg">Rank</th>
+              <th className="text-left p-3 font-bold text-primary-foreground uppercase text-sm">Team Name</th>
+              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">WWCD</th>
+              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">MP</th>
+              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">Place</th>
+              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">Kills</th>
+              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm rounded-r-lg">Total</th>
             </tr>
           </thead>
           <tbody>
-            {sortedTeams.map((team, index) => (
-              <tr key={team.id} className="border-b border-border hover:bg-primary/5">
-                <td className="p-3 font-bold">{index + 1}</td>
-                <td className="p-3">{team.name}</td>
-                <td className="text-right p-3 font-bold text-primary">{team.totalPoints}</td>
-                <td className="text-right p-3">{team.totalKills}</td>
-                <td className="text-right p-3">{team.matchesPlayed}</td>
-                <td className="text-right p-3">{team.firstPlaceWins}</td>
-              </tr>
-            ))}
+            {sortedTeams.map((team, index) => {
+              const rank = index + 1;
+              const isTopTeam = rank <= 7;
+              
+              return (
+                <tr 
+                  key={team.id} 
+                  className={`
+                    ${isTopTeam 
+                      ? 'bg-[hsl(220_18%_15%)] border-2 border-primary rounded-lg' 
+                      : 'bg-[hsl(220_18%_10%)]'
+                    }
+                  `}
+                >
+                  <td className={`p-3 font-bold text-primary text-xl ${isTopTeam ? 'rounded-l-lg' : ''}`}>
+                    {rank}
+                  </td>
+                  <td className="p-3 font-bold text-foreground uppercase">
+                    {team.name}
+                  </td>
+                  <td className="text-center p-3">
+                    {team.firstPlaceWins > 0 ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="bg-primary rounded-full p-1">
+                          <Trophy className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                        <span className="text-primary font-bold">{team.firstPlaceWins}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </td>
+                  <td className="text-center p-3 text-primary font-bold">
+                    {team.matchesPlayed}
+                  </td>
+                  <td className="text-center p-3 text-primary font-bold">
+                    {team.placementPoints}
+                  </td>
+                  <td className="text-center p-3 text-primary font-bold">
+                    {team.totalKills}
+                  </td>
+                  <td className={`text-center p-3 text-primary font-bold text-xl ${isTopTeam ? 'rounded-r-lg' : ''}`}>
+                    {team.totalPoints}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
