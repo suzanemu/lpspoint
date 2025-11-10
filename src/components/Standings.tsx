@@ -91,8 +91,13 @@ const Standings = ({ teams, isAdmin = false, tournamentName = "Tournament" }: St
                   <td className={`p-3 font-bold text-primary text-xl ${isTopTeam ? 'rounded-l-lg' : ''}`}>
                     {rank}
                   </td>
-                  <td className="p-3 font-bold text-foreground uppercase">
-                    {team.name}
+                  <td className="p-3">
+                    <div className="flex items-center gap-3">
+                      {team.logo_url && (
+                        <img src={team.logo_url} alt={team.name} className="w-8 h-8 rounded object-cover" />
+                      )}
+                      <span className="font-bold text-foreground uppercase">{team.name}</span>
+                    </div>
                   </td>
                   <td className="text-center p-3">
                     {team.firstPlaceWins > 0 ? (
