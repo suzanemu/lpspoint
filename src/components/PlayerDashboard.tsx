@@ -114,7 +114,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
 
     const { data, error } = await supabase
       .from("teams")
-      .select("id, name, created_at")
+      .select("id, name, created_at, logo_url")
       .eq("tournament_id", tournament.id);
 
     if (error) {
@@ -156,6 +156,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
           totalKills,
           matchesPlayed: teamMatches.length,
           firstPlaceWins,
+          logo_url: team.logo_url,
         };
       });
       setTeams(teamsData);

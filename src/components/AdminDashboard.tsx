@@ -63,7 +63,7 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
 
     const { data: teamsData, error: teamsError } = await supabase
       .from("teams")
-      .select("id, name, created_at")
+      .select("id, name, created_at, logo_url")
       .eq("tournament_id", selectedTournament);
 
     if (teamsError) {
@@ -106,6 +106,7 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
           totalKills,
           matchesPlayed: teamMatches.length,
           firstPlaceWins,
+          logo_url: team.logo_url,
         };
       });
 
