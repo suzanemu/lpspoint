@@ -96,6 +96,51 @@ export type Database = {
           },
         ]
       }
+      player_stats: {
+        Row: {
+          created_at: string
+          damage: number
+          id: string
+          kills: number
+          player_name: string
+          screenshot_id: string | null
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          damage?: number
+          id?: string
+          kills?: number
+          player_name: string
+          screenshot_id?: string | null
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          damage?: number
+          id?: string
+          kills?: number
+          player_name?: string
+          screenshot_id?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_stats_screenshot_id_fkey"
+            columns: ["screenshot_id"]
+            isOneToOne: false
+            referencedRelation: "match_screenshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           code_used: string | null

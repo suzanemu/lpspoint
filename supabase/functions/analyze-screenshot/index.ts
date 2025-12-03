@@ -25,7 +25,26 @@ serve(async (req) => {
           role: 'user',
           content: [{
             type: 'text',
-            text: 'Analyze this PUBG Mobile match result screenshot. Extract ONLY the team placement (rank like #1, #2, etc) and total kills. Return JSON with {placement: number, kills: number}. If you cannot find these values, return null for those fields.'
+            text: `Analyze this PUBG Mobile match result screenshot. Extract the following information:
+
+1. Team placement (rank like #1, #2, etc - the number shown at top like "#13/82")
+2. Total team kills (sum of all player eliminations)
+3. Player stats - for each player in the team, extract:
+   - Player name (shown in "Name" column, e.g., "NfB | THOR", "NfB | MURIKHA", "SHAHAZZ", "NfB | RaheBEATS")
+   - Individual kills (shown in "Eliminations" column)
+   - Individual damage (shown in "Damage" column, numeric value like 79, 487, 19, 434)
+
+Return JSON in this exact format:
+{
+  "placement": number,
+  "kills": number,
+  "players": [
+    { "name": "player name", "kills": number, "damage": number },
+    { "name": "player name", "kills": number, "damage": number }
+  ]
+}
+
+If you cannot find these values, return null for those fields. Make sure to extract all 4 players if visible.`
           }, {
             type: 'image_url',
             image_url: { url: imageUrl }
@@ -36,10 +55,14 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('AI Response:', JSON.stringify(data));
+    
     let content = data.choices[0]?.message?.content || '{}';
     
     // Remove markdown code blocks if present
     content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    console.log('Parsed content:', content);
     
     const parsed = JSON.parse(content);
 
