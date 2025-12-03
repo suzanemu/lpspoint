@@ -34,7 +34,15 @@ interface Screenshot {
   placement: number | null;
   kills: number | null;
   points: number | null;
-  teams: { name: string } | null;
+  teams: { name: string; id: string } | null;
+  team_id: string;
+}
+
+interface PlayerStat {
+  player_name: string;
+  kills: number;
+  damage: number;
+  team_id: string;
 }
 
 interface TeamScreenshotExplorerProps {
@@ -44,6 +52,7 @@ interface TeamScreenshotExplorerProps {
 
 const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotExplorerProps) => {
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
+  const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<Screenshot | null>(null);
@@ -83,7 +92,8 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
         placement,
         kills,
         points,
-        teams (name)
+        team_id,
+        teams (id, name)
       `)
       .order("day", { ascending: true })
       .order("match_number", { ascending: true });
@@ -93,8 +103,43 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
       toast.error("Failed to load screenshots");
     } else {
       setScreenshots(data || []);
+      // Fetch player stats for all teams
+      const teamIds = [...new Set((data || []).map(s => s.team_id))];
+      if (teamIds.length > 0) {
+        const { data: statsData } = await supabase
+          .from("player_stats")
+          .select("player_name, kills, damage, team_id")
+          .in("team_id", teamIds);
+        setPlayerStats(statsData || []);
+      }
     }
     setLoading(false);
+  };
+
+  // Get team's MVP and top damage player
+  const getTeamTopPlayers = (teamId: string) => {
+    const teamStats = playerStats.filter(s => s.team_id === teamId);
+    if (teamStats.length === 0) return { mvp: null, topDamage: null };
+
+    // Aggregate stats by player name
+    const aggregated = teamStats.reduce((acc, stat) => {
+      if (!acc[stat.player_name]) {
+        acc[stat.player_name] = { kills: 0, damage: 0 };
+      }
+      acc[stat.player_name].kills += stat.kills;
+      acc[stat.player_name].damage += stat.damage;
+      return acc;
+    }, {} as Record<string, { kills: number; damage: number }>);
+
+    const players = Object.entries(aggregated).map(([name, stats]) => ({
+      name,
+      ...stats
+    }));
+
+    const mvp = players.reduce((max, p) => p.kills > max.kills ? p : max, players[0]);
+    const topDamage = players.reduce((max, p) => p.damage > max.damage ? p : max, players[0]);
+
+    return { mvp, topDamage };
   };
 
   const handleDelete = async () => {
@@ -216,6 +261,8 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                 <CollapsibleContent className="mt-2 ml-4 space-y-2">
                   {Object.entries(teams).map(([teamName, teamScreenshots]) => {
                     const teamKey = `${day}-${teamName}`;
+                    const teamId = teamScreenshots[0]?.team_id;
+                    const { mvp, topDamage } = getTeamTopPlayers(teamId);
                     return (
                       <Collapsible
                         key={teamKey}
@@ -235,6 +282,16 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                               <Folder className="h-4 w-4" />
                             )}
                             <h4 className="font-semibold text-foreground/90">{teamName}</h4>
+                            {mvp && (
+                              <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">
+                                MVP: {mvp.name} ({mvp.kills} kills)
+                              </Badge>
+                            )}
+                            {topDamage && topDamage.name !== mvp?.name && (
+                              <Badge className="bg-red-500/20 text-red-400 text-xs">
+                                Top DMG: {topDamage.name} ({topDamage.damage})
+                              </Badge>
+                            )}
                             <Badge variant="outline" className="ml-auto text-xs">
                               {teamScreenshots.length} screenshots
                             </Badge>
