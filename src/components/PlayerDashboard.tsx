@@ -16,6 +16,12 @@ interface PlayerDashboardProps {
   userId: string;
 }
 
+interface PlayerStat {
+  player_name: string;
+  total_kills: number;
+  total_damage: number;
+}
+
 const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   const navigate = useNavigate();
   const [teams, setTeams] = useState<Team[]>([]);
@@ -29,6 +35,8 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const [uploadedMatches, setUploadedMatches] = useState<number>(0);
   const [allScreenshots, setAllScreenshots] = useState<any[]>([]);
+  const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
+  const [topDamagePlayer, setTopDamagePlayer] = useState<PlayerStat | null>(null);
 
   useEffect(() => {
     fetchTournamentAndTeams();
@@ -37,10 +45,12 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   useEffect(() => {
     if (tournament?.id) {
       fetchAllScreenshots();
+      fetchPlayerStats();
       const interval = setInterval(() => {
         fetchTeams();
         fetchUploadedMatches();
         fetchAllScreenshots();
+        fetchPlayerStats();
       }, 5000);
       return () => clearInterval(interval);
     }
@@ -163,6 +173,59 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
     }
   };
 
+  const fetchPlayerStats = async () => {
+    if (!tournament?.id) return;
+
+    // Get team IDs for the tournament
+    const { data: teamsData } = await supabase
+      .from("teams")
+      .select("id")
+      .eq("tournament_id", tournament.id);
+
+    if (!teamsData || teamsData.length === 0) return;
+
+    const teamIds = teamsData.map(t => t.id);
+
+    // Get all player stats for these teams
+    const { data: playerStats, error } = await supabase
+      .from("player_stats")
+      .select("player_name, kills, damage, team_id")
+      .in("team_id", teamIds);
+
+    if (error || !playerStats || playerStats.length === 0) {
+      setMvpPlayer(null);
+      setTopDamagePlayer(null);
+      return;
+    }
+
+    // Aggregate stats by player name
+    const aggregatedStats: Record<string, { kills: number; damage: number }> = {};
+    playerStats.forEach((stat) => {
+      const name = stat.player_name;
+      if (!aggregatedStats[name]) {
+        aggregatedStats[name] = { kills: 0, damage: 0 };
+      }
+      aggregatedStats[name].kills += stat.kills || 0;
+      aggregatedStats[name].damage += stat.damage || 0;
+    });
+
+    // Find MVP (highest kills) and top damage player
+    let mvp: PlayerStat | null = null;
+    let topDamage: PlayerStat | null = null;
+
+    Object.entries(aggregatedStats).forEach(([name, stats]) => {
+      if (!mvp || stats.kills > mvp.total_kills) {
+        mvp = { player_name: name, total_kills: stats.kills, total_damage: stats.damage };
+      }
+      if (!topDamage || stats.damage > topDamage.total_damage) {
+        topDamage = { player_name: name, total_kills: stats.kills, total_damage: stats.damage };
+      }
+    });
+
+    setMvpPlayer(mvp);
+    setTopDamagePlayer(topDamage);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -252,7 +315,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
             continue;
           }
 
-          const { placement, kills } = analysisData;
+          const { placement, kills, players } = analysisData;
 
           if (placement === null || kills === null) {
             errorMessages.push(`Screenshot ${i + 1}: Could not detect placement or kills. Please ensure the screenshot clearly shows the match results.`);
@@ -269,7 +332,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
           const placementPoints = PLACEMENT_POINTS[placement] || 0;
           const points = placementPoints + kills;
 
-          const { error: dbError } = await supabase
+          const { data: screenshotData, error: dbError } = await supabase
             .from("match_screenshots")
             .insert({
               team_id: selectedTeamId,
@@ -281,13 +344,33 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
               kills,
               points,
               analyzed_at: new Date().toISOString(),
-            });
+            })
+            .select()
+            .single();
 
           if (dbError) {
             console.error("Database error:", dbError);
             errorMessages.push(`Screenshot ${i + 1}: Failed to save to database`);
             failCount++;
           } else {
+            // Save player stats if available
+            if (players && Array.isArray(players) && players.length > 0) {
+              const playerStatsToInsert = players.map((player: { name: string; kills: number; damage: number }) => ({
+                screenshot_id: screenshotData.id,
+                team_id: selectedTeamId,
+                player_name: player.name,
+                kills: player.kills || 0,
+                damage: player.damage || 0,
+              }));
+
+              const { error: playerStatsError } = await supabase
+                .from("player_stats")
+                .insert(playerStatsToInsert);
+
+              if (playerStatsError) {
+                console.error("Player stats error:", playerStatsError);
+              }
+            }
             successCount++;
           }
         } catch (error) {
@@ -480,7 +563,13 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
           </div>
         </Card>
 
-        {teams.length > 0 && <Standings teams={teams} />}
+        {teams.length > 0 && (
+          <Standings 
+            teams={teams} 
+            mvpPlayer={mvpPlayer}
+            topDamagePlayer={topDamagePlayer}
+          />
+        )}
 
         {allScreenshots.length > 0 && (
           <Card className="p-6 border-primary/30 bg-card/95">

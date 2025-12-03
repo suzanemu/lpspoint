@@ -1,14 +1,28 @@
 import { Button } from "@/components/ui/button";
-import { Download, Trophy } from "lucide-react";
+import { Download, Trophy, Target, Flame } from "lucide-react";
 import { Team } from "@/types/tournament";
+
+interface PlayerStat {
+  player_name: string;
+  total_kills: number;
+  total_damage: number;
+}
 
 interface StandingsProps {
   teams: Team[];
   isAdmin?: boolean;
   tournamentName?: string;
+  mvpPlayer?: PlayerStat | null;
+  topDamagePlayer?: PlayerStat | null;
 }
 
-const Standings = ({ teams, isAdmin = false, tournamentName = "Tournament" }: StandingsProps) => {
+const Standings = ({ 
+  teams, 
+  isAdmin = false, 
+  tournamentName = "Tournament",
+  mvpPlayer,
+  topDamagePlayer
+}: StandingsProps) => {
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.totalPoints !== a.totalPoints) {
       return b.totalPoints - a.totalPoints;
@@ -59,6 +73,40 @@ const Standings = ({ teams, isAdmin = false, tournamentName = "Tournament" }: St
           </Button>
         )}
       </div>
+
+      {/* MVP and Top Damage Player Cards */}
+      {(mvpPlayer || topDamagePlayer) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {mvpPlayer && (
+            <div className="bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-amber-500 rounded-full p-2">
+                  <Target className="h-5 w-5 text-black" />
+                </div>
+                <div>
+                  <p className="text-xs text-amber-400 uppercase tracking-wider font-semibold">MVP - Highest Kills</p>
+                  <p className="text-lg font-bold text-foreground">{mvpPlayer.player_name}</p>
+                  <p className="text-sm text-amber-400">{mvpPlayer.total_kills} Total Kills</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {topDamagePlayer && (
+            <div className="bg-gradient-to-r from-red-500/20 to-red-600/10 border border-red-500/30 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500 rounded-full p-2">
+                  <Flame className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-red-400 uppercase tracking-wider font-semibold">Top Damage</p>
+                  <p className="text-lg font-bold text-foreground">{topDamagePlayer.player_name}</p>
+                  <p className="text-sm text-red-400">{topDamagePlayer.total_damage.toLocaleString()} Total Damage</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       
       <div className="overflow-x-auto">
         <table className="w-full border-separate border-spacing-y-1">
