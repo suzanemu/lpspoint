@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, ChevronDown, ChevronRight, FolderOpen, Folder } from "lucide-react";
 import {
@@ -17,7 +18,15 @@ interface Screenshot {
   placement: number | null;
   kills: number | null;
   points: number | null;
-  teams: { name: string } | null;
+  teams: { name: string; id: string } | null;
+  team_id: string;
+}
+
+interface PlayerStat {
+  player_name: string;
+  kills: number;
+  damage: number;
+  team_id: string;
 }
 
 interface PlayerScreenshotExplorerProps {
@@ -28,6 +37,46 @@ const PlayerScreenshotExplorer = ({ screenshots }: PlayerScreenshotExplorerProps
   const [selectedImage, setSelectedImage] = useState<Screenshot | null>(null);
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+  const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
+
+  useEffect(() => {
+    const fetchPlayerStats = async () => {
+      const teamIds = [...new Set(screenshots.map(s => s.team_id).filter(Boolean))];
+      if (teamIds.length > 0) {
+        const { data } = await supabase
+          .from("player_stats")
+          .select("player_name, kills, damage, team_id")
+          .in("team_id", teamIds);
+        setPlayerStats(data || []);
+      }
+    };
+    fetchPlayerStats();
+  }, [screenshots]);
+
+  // Get team's MVP and top damage player
+  const getTeamTopPlayers = (teamId: string) => {
+    const teamStats = playerStats.filter(s => s.team_id === teamId);
+    if (teamStats.length === 0) return { mvp: null, topDamage: null };
+
+    const aggregated = teamStats.reduce((acc, stat) => {
+      if (!acc[stat.player_name]) {
+        acc[stat.player_name] = { kills: 0, damage: 0 };
+      }
+      acc[stat.player_name].kills += stat.kills;
+      acc[stat.player_name].damage += stat.damage;
+      return acc;
+    }, {} as Record<string, { kills: number; damage: number }>);
+
+    const players = Object.entries(aggregated).map(([name, stats]) => ({
+      name,
+      ...stats
+    }));
+
+    const mvp = players.reduce((max, p) => p.kills > max.kills ? p : max, players[0]);
+    const topDamage = players.reduce((max, p) => p.damage > max.damage ? p : max, players[0]);
+
+    return { mvp, topDamage };
+  };
 
   // Group screenshots by day and team
   const groupedScreenshots = screenshots.reduce((acc, screenshot) => {
@@ -89,6 +138,8 @@ const PlayerScreenshotExplorer = ({ screenshots }: PlayerScreenshotExplorerProps
             <CollapsibleContent className="mt-2 ml-4 space-y-2">
               {Object.entries(teams).map(([teamName, teamScreenshots]) => {
                 const teamKey = `${day}-${teamName}`;
+                const teamId = teamScreenshots[0]?.team_id;
+                const { mvp, topDamage } = getTeamTopPlayers(teamId);
                 return (
                   <Collapsible
                     key={teamKey}
@@ -108,6 +159,16 @@ const PlayerScreenshotExplorer = ({ screenshots }: PlayerScreenshotExplorerProps
                           <Folder className="h-4 w-4" />
                         )}
                         <h4 className="font-semibold text-foreground/90">{teamName}</h4>
+                        {mvp && (
+                          <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">
+                            MVP: {mvp.name} ({mvp.kills} kills)
+                          </Badge>
+                        )}
+                        {topDamage && topDamage.name !== mvp?.name && (
+                          <Badge className="bg-red-500/20 text-red-400 text-xs">
+                            Top DMG: {topDamage.name} ({topDamage.damage})
+                          </Badge>
+                        )}
                         <Badge variant="outline" className="ml-auto text-xs">
                           {teamScreenshots.length} screenshots
                         </Badge>
