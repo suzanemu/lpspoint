@@ -393,117 +393,120 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   const canUploadMore = !tournament || uploadedMatches < 4;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-background">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+    <div className="min-h-screen p-3 sm:p-4 md:p-8 bg-background">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-3xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Player Dashboard
             </h1>
-            <p className="text-muted-foreground mt-2">Upload your match screenshots</p>
+            <p className="text-muted-foreground mt-1 sm:mt-2 text-xs sm:text-base">Upload your match screenshots</p>
           </div>
           <Button
             onClick={handleSignOut}
             variant="outline"
-            className="border-primary/50 hover:bg-primary/10"
+            size="sm"
+            className="border-primary/50 hover:bg-primary/10 shrink-0"
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Sign Out</span>
           </Button>
         </div>
 
         {tournament && (
-          <Card className="p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 shadow-card">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-primary" />
+          <Card className="p-4 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 shadow-card">
+            <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               Tournament Info
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <h3 className="font-semibold text-lg">{tournament.name}</h3>
+                <h3 className="font-semibold text-base sm:text-lg">{tournament.name}</h3>
                 {tournament.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {tournament.description}
                   </p>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-background/50 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground">Total Matches</p>
-                  <p className="text-2xl font-bold">{tournament.total_matches}</p>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="text-center p-3 sm:p-4 bg-background/50 rounded-lg border border-border">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Total Matches</p>
+                  <p className="text-xl sm:text-2xl font-bold">{tournament.total_matches}</p>
                 </div>
-                <div className="text-center p-4 bg-background/50 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground">Day {selectedDay} Uploaded</p>
-                  <p className="text-2xl font-bold">{uploadedMatches} / 4</p>
+                <div className="text-center p-3 sm:p-4 bg-background/50 rounded-lg border border-border">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Day {selectedDay} Uploaded</p>
+                  <p className="text-xl sm:text-2xl font-bold">{uploadedMatches} / 4</p>
                 </div>
               </div>
             </div>
           </Card>
         )}
 
-        <Card className="p-6 border-primary/30 shadow-card bg-card/95">
-          <h2 className="text-2xl font-bold mb-4">Upload Match Screenshot</h2>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="teamSelect">Select Team</Label>
-              <Select value={selectedTeamId} onValueChange={(value) => {
-                setSelectedTeamId(value);
-                fetchUploadedMatches();
-              }}>
-                <SelectTrigger className="bg-input border-border max-w-xs">
-                  <SelectValue placeholder="Choose a team" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-primary/30 z-50">
-                  {allTeams.map((team) => (
-                    <SelectItem key={team.id} value={team.id}>
-                      <div className="flex items-center gap-2">
-                        {team.logo_url && (
-                          <img
-                            src={team.logo_url}
-                            alt={team.name}
-                            className="w-5 h-5 rounded object-cover"
-                          />
-                        )}
-                        {team.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Card className="p-4 sm:p-6 border-primary/30 shadow-card bg-card/95">
+          <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4">Upload Match Screenshot</h2>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="teamSelect" className="text-sm">Select Team</Label>
+                <Select value={selectedTeamId} onValueChange={(value) => {
+                  setSelectedTeamId(value);
+                  fetchUploadedMatches();
+                }}>
+                  <SelectTrigger className="bg-input border-border w-full">
+                    <SelectValue placeholder="Choose a team" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-primary/30 z-50">
+                    {allTeams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        <div className="flex items-center gap-2">
+                          {team.logo_url && (
+                            <img
+                              src={team.logo_url}
+                              alt={team.name}
+                              className="w-5 h-5 rounded object-cover"
+                            />
+                          )}
+                          {team.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="daySelect" className="text-sm">Select Day</Label>
+                <Select value={selectedDay.toString()} onValueChange={(value) => {
+                  setSelectedDay(parseInt(value));
+                  fetchUploadedMatches();
+                }}>
+                  <SelectTrigger className="bg-input border-border w-full">
+                    <SelectValue placeholder="Choose a day" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-primary/30 z-50">
+                    <SelectItem value="1">Day 1</SelectItem>
+                    <SelectItem value="2">Day 2</SelectItem>
+                    <SelectItem value="3">Day 3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="matchNumber" className="text-sm">Match Number</Label>
+                <Input
+                  id="matchNumber"
+                  type="number"
+                  min="1"
+                  value={matchNumber}
+                  onChange={(e) => setMatchNumber(parseInt(e.target.value) || 1)}
+                  className="bg-input border-border w-full"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="daySelect">Select Day</Label>
-              <Select value={selectedDay.toString()} onValueChange={(value) => {
-                setSelectedDay(parseInt(value));
-                fetchUploadedMatches();
-              }}>
-                <SelectTrigger className="bg-input border-border max-w-xs">
-                  <SelectValue placeholder="Choose a day" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-primary/30 z-50">
-                  <SelectItem value="1">Day 1</SelectItem>
-                  <SelectItem value="2">Day 2</SelectItem>
-                  <SelectItem value="3">Day 3</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="matchNumber">Match Number</Label>
-              <Input
-                id="matchNumber"
-                type="number"
-                min="1"
-                value={matchNumber}
-                onChange={(e) => setMatchNumber(parseInt(e.target.value) || 1)}
-                className="bg-input border-border max-w-xs"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="screenshot">Upload Screenshots (Max 4)</Label>
-              <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+              <Label htmlFor="screenshot" className="text-sm">Upload Screenshots (Max 4)</Label>
+              <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 sm:p-8 text-center hover:border-primary/50 transition-colors">
                 <input
                   id="screenshot"
                   type="file"
@@ -519,23 +522,23 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
                 >
                   {uploading || analyzing ? (
                     <>
-                      <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                      <p className="text-lg font-semibold">
+                      <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 text-primary animate-spin" />
+                      <p className="text-sm sm:text-lg font-semibold">
                         {uploadProgress || (uploading ? "Uploading..." : "Analyzing with AI...")}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Please wait while we process your screenshots
                       </p>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-12 w-12 text-primary" />
-                      <p className="text-lg font-semibold">
-                        Click to upload screenshots (up to 4)
+                      <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
+                      <p className="text-sm sm:text-lg font-semibold">
+                        Tap to upload screenshots (up to 4)
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {canUploadMore
-                          ? "AI will automatically extract placement and kills from each"
+                          ? "AI will auto-extract placement and kills"
                           : "You have uploaded all allowed matches"}
                       </p>
                     </>
@@ -554,8 +557,8 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
         )}
 
         {allScreenshots.length > 0 && (
-          <Card className="p-6 border-primary/30 bg-card/95">
-            <h2 className="text-2xl font-bold mb-4">All Uploaded Screenshots</h2>
+          <Card className="p-4 sm:p-6 border-primary/30 bg-card/95">
+            <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4">All Uploaded Screenshots</h2>
             <PlayerScreenshotExplorer screenshots={allScreenshots} />
           </Card>
         )}

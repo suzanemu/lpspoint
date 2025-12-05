@@ -57,14 +57,14 @@ const Standings = ({
   };
 
   return (
-    <div className="bg-[hsl(220_20%_12%)] rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-[hsl(220_20%_12%)] rounded-lg p-3 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
-          <h3 className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Season 1</h3>
-          <h2 className="text-4xl font-bold text-primary uppercase tracking-wider">Overall Standings</h2>
+          <h3 className="text-xs sm:text-sm text-muted-foreground uppercase tracking-wider mb-1">Season 1</h3>
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-primary uppercase tracking-wider">Overall Standings</h2>
         </div>
         {isAdmin && (
-          <Button onClick={downloadCSV} variant="outline" className="border-primary/50">
+          <Button onClick={downloadCSV} variant="outline" size="sm" className="border-primary/50 w-full sm:w-auto">
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -73,33 +73,45 @@ const Standings = ({
 
       {/* MVP Card */}
       {mvpPlayer && (
-        <div className="mb-6">
-          <div className="bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-lg p-4 max-w-md">
-            <div className="flex items-center gap-3">
-              <div className="bg-amber-500 rounded-full p-2">
-                <Target className="h-5 w-5 text-black" />
+        <div className="mb-4 sm:mb-6">
+          <div className="bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-amber-500 rounded-full p-1.5 sm:p-2 shrink-0">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-black" />
               </div>
-              <div>
-                <p className="text-xs text-amber-400 uppercase tracking-wider font-semibold">MVP - Highest Kills</p>
-                <p className="text-lg font-bold text-foreground">{mvpPlayer.player_name}</p>
-                <p className="text-sm text-amber-400">{mvpPlayer.total_kills} Total Kills</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs text-amber-400 uppercase tracking-wider font-semibold">MVP - Highest Kills</p>
+                <p className="text-sm sm:text-lg font-bold text-foreground truncate">{mvpPlayer.player_name}</p>
+                <p className="text-xs sm:text-sm text-amber-400">{mvpPlayer.total_kills} Total Kills</p>
               </div>
             </div>
           </div>
         </div>
       )}
       
-      <div className="overflow-x-auto">
-        <table className="w-full border-separate border-spacing-y-1">
+      <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+        <table className="w-full border-separate border-spacing-y-1 min-w-[500px] sm:min-w-0">
           <thead>
             <tr className="bg-primary">
-              <th className="text-left p-3 font-bold text-primary-foreground uppercase text-sm rounded-l-lg">Rank</th>
-              <th className="text-left p-3 font-bold text-primary-foreground uppercase text-sm">Team Name</th>
-              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">WWCD</th>
-              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">MP</th>
-              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">Place</th>
-              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm">Kills</th>
-              <th className="text-center p-3 font-bold text-primary-foreground uppercase text-sm rounded-r-lg">Total</th>
+              <th className="text-left p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm rounded-l-lg">#</th>
+              <th className="text-left p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm">Team</th>
+              <th className="text-center p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm">
+                <span className="hidden sm:inline">WWCD</span>
+                <Trophy className="h-3 w-3 sm:hidden inline" />
+              </th>
+              <th className="text-center p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm">MP</th>
+              <th className="text-center p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm">
+                <span className="hidden sm:inline">Place</span>
+                <span className="sm:hidden">PL</span>
+              </th>
+              <th className="text-center p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm">
+                <span className="hidden sm:inline">Kills</span>
+                <span className="sm:hidden">K</span>
+              </th>
+              <th className="text-center p-2 sm:p-3 font-bold text-primary-foreground uppercase text-xs sm:text-sm rounded-r-lg">
+                <span className="hidden sm:inline">Total</span>
+                <span className="sm:hidden">PTS</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -117,39 +129,39 @@ const Standings = ({
                     }
                   `}
                 >
-                  <td className={`p-3 font-bold text-primary text-xl ${isTopTeam ? 'rounded-l-lg' : ''}`}>
+                  <td className={`p-2 sm:p-3 font-bold text-primary text-base sm:text-xl ${isTopTeam ? 'rounded-l-lg' : ''}`}>
                     {rank}
                   </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
+                  <td className="p-2 sm:p-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       {team.logo_url && (
-                        <img src={team.logo_url} alt={team.name} className="w-8 h-8 rounded object-cover" />
+                        <img src={team.logo_url} alt={team.name} className="w-6 h-6 sm:w-8 sm:h-8 rounded object-cover shrink-0" />
                       )}
-                      <span className="font-bold text-foreground uppercase">{team.name}</span>
+                      <span className="font-bold text-foreground uppercase text-xs sm:text-base truncate max-w-[80px] sm:max-w-none">{team.name}</span>
                     </div>
                   </td>
-                  <td className="text-center p-3">
+                  <td className="text-center p-2 sm:p-3">
                     {team.firstPlaceWins > 0 ? (
-                      <div className="flex items-center justify-center gap-1">
-                        <div className="bg-primary rounded-full p-1">
-                          <Trophy className="h-3 w-3 text-primary-foreground" />
+                      <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                        <div className="bg-primary rounded-full p-0.5 sm:p-1">
+                          <Trophy className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary-foreground" />
                         </div>
-                        <span className="text-primary font-bold">{team.firstPlaceWins}</span>
+                        <span className="text-primary font-bold text-xs sm:text-base">{team.firstPlaceWins}</span>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">-</span>
+                      <span className="text-muted-foreground text-xs sm:text-base">-</span>
                     )}
                   </td>
-                  <td className="text-center p-3 text-primary font-bold">
+                  <td className="text-center p-2 sm:p-3 text-primary font-bold text-xs sm:text-base">
                     {team.matchesPlayed}
                   </td>
-                  <td className="text-center p-3 text-primary font-bold">
+                  <td className="text-center p-2 sm:p-3 text-primary font-bold text-xs sm:text-base">
                     {team.placementPoints}
                   </td>
-                  <td className="text-center p-3 text-primary font-bold">
+                  <td className="text-center p-2 sm:p-3 text-primary font-bold text-xs sm:text-base">
                     {team.totalKills}
                   </td>
-                  <td className={`text-center p-3 text-primary font-bold text-xl ${isTopTeam ? 'rounded-r-lg' : ''}`}>
+                  <td className={`text-center p-2 sm:p-3 text-primary font-bold text-base sm:text-xl ${isTopTeam ? 'rounded-r-lg' : ''}`}>
                     {team.totalPoints}
                   </td>
                 </tr>
