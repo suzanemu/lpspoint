@@ -19,7 +19,6 @@ interface AdminDashboardProps {
 interface PlayerStat {
   player_name: string;
   total_kills: number;
-  total_damage: number;
 }
 
 const AdminDashboard = ({ userId }: AdminDashboardProps) => {
@@ -27,8 +26,6 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<string>("");
-  const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
-  const [topDamagePlayer, setTopDamagePlayer] = useState<PlayerStat | null>(null);
 
   useEffect(() => {
     fetchTournaments();
@@ -126,10 +123,11 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
     }
   };
 
+  const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
+
   const fetchPlayerStats = async () => {
     if (!selectedTournament) return;
 
-    // Get team IDs for the selected tournament
     const { data: teamsData } = await supabase
       .from("teams")
       .select("id")
@@ -139,44 +137,30 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
 
     const teamIds = teamsData.map(t => t.id);
 
-    // Get all player stats for these teams
     const { data: playerStats, error } = await supabase
       .from("player_stats")
-      .select("player_name, kills, damage, team_id")
+      .select("player_name, kills, team_id")
       .in("team_id", teamIds);
 
     if (error || !playerStats || playerStats.length === 0) {
       setMvpPlayer(null);
-      setTopDamagePlayer(null);
       return;
     }
 
-    // Aggregate stats by player name
-    const aggregatedStats: Record<string, { kills: number; damage: number }> = {};
+    const aggregatedStats: Record<string, number> = {};
     playerStats.forEach((stat) => {
       const name = stat.player_name;
-      if (!aggregatedStats[name]) {
-        aggregatedStats[name] = { kills: 0, damage: 0 };
-      }
-      aggregatedStats[name].kills += stat.kills || 0;
-      aggregatedStats[name].damage += stat.damage || 0;
+      aggregatedStats[name] = (aggregatedStats[name] || 0) + (stat.kills || 0);
     });
 
-    // Find MVP (highest kills) and top damage player
     let mvp: PlayerStat | null = null;
-    let topDamage: PlayerStat | null = null;
-
-    Object.entries(aggregatedStats).forEach(([name, stats]) => {
-      if (!mvp || stats.kills > mvp.total_kills) {
-        mvp = { player_name: name, total_kills: stats.kills, total_damage: stats.damage };
-      }
-      if (!topDamage || stats.damage > topDamage.total_damage) {
-        topDamage = { player_name: name, total_kills: stats.kills, total_damage: stats.damage };
+    Object.entries(aggregatedStats).forEach(([name, kills]) => {
+      if (!mvp || kills > mvp.total_kills) {
+        mvp = { player_name: name, total_kills: kills };
       }
     });
 
     setMvpPlayer(mvp);
-    setTopDamagePlayer(topDamage);
   };
 
   const handleSignOut = async () => {
@@ -236,7 +220,6 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
                 isAdmin={true}
                 tournamentName={tournaments.find(t => t.id === selectedTournament)?.name}
                 mvpPlayer={mvpPlayer}
-                topDamagePlayer={topDamagePlayer}
               />
             ) : (
               <div className="text-center py-12 text-muted-foreground">

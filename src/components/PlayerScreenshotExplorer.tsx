@@ -164,11 +164,6 @@ const PlayerScreenshotExplorer = ({ screenshots }: PlayerScreenshotExplorerProps
                             MVP: {mvp.name} ({mvp.kills} kills)
                           </Badge>
                         )}
-                        {topDamage && topDamage.name !== mvp?.name && (
-                          <Badge className="bg-red-500/20 text-red-400 text-xs">
-                            Top DMG: {topDamage.name} ({topDamage.damage})
-                          </Badge>
-                        )}
                         <Badge variant="outline" className="ml-auto text-xs">
                           {teamScreenshots.length} screenshots
                         </Badge>
