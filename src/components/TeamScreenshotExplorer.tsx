@@ -220,19 +220,19 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
 
   return (
     <>
-      <Card className="p-6 border-primary/30 bg-card/95">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Image className="h-5 w-5 text-primary" />
+      <Card className="p-3 sm:p-6 border-primary/30 bg-card/95">
+        <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Image className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Screenshot Verification
         </h2>
 
         {screenshots.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <AlertCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>No screenshots uploaded yet</p>
+          <div className="text-center py-6 sm:py-8 text-muted-foreground">
+            <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 opacity-50" />
+            <p className="text-sm sm:text-base">No screenshots uploaded yet</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {Object.entries(groupedScreenshots).sort(([a], [b]) => Number(a) - Number(b)).map(([day, teams]) => (
               <Collapsible
                 key={day}
@@ -240,25 +240,25 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                 onOpenChange={() => toggleDay(Number(day))}
               >
                 <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center gap-2 p-3 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2 p-2 sm:p-3 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors">
                     {expandedDays[Number(day)] ? (
-                      <ChevronDown className="h-5 w-5 text-primary" />
+                      <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                     ) : (
-                      <ChevronRight className="h-5 w-5 text-primary" />
+                      <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                     )}
                     {expandedDays[Number(day)] ? (
-                      <FolderOpen className="h-5 w-5 text-primary" />
+                      <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                     ) : (
-                      <Folder className="h-5 w-5 text-primary" />
+                      <Folder className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                     )}
-                    <h3 className="text-lg font-bold text-primary">Day {day}</h3>
-                    <Badge variant="secondary" className="ml-auto">
-                      {Object.values(teams).reduce((sum, arr) => sum + arr.length, 0)} screenshots
+                    <h3 className="text-sm sm:text-lg font-bold text-primary">Day {day}</h3>
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      {Object.values(teams).reduce((sum, arr) => sum + arr.length, 0)}
                     </Badge>
                   </div>
                 </CollapsibleTrigger>
                 
-                <CollapsibleContent className="mt-2 ml-4 space-y-2">
+                <CollapsibleContent className="mt-2 ml-2 sm:ml-4 space-y-2">
                   {Object.entries(teams).map(([teamName, teamScreenshots]) => {
                     const teamKey = `${day}-${teamName}`;
                     const teamId = teamScreenshots[0]?.team_id;
@@ -270,75 +270,70 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                         onOpenChange={() => toggleTeam(teamKey)}
                       >
                         <CollapsibleTrigger className="w-full">
-                          <div className="flex items-center gap-2 p-2 bg-secondary/50 hover:bg-secondary rounded-lg transition-colors">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-2 bg-secondary/50 hover:bg-secondary rounded-lg transition-colors">
                             {expandedTeams[teamKey] ? (
-                              <ChevronDown className="h-4 w-4" />
+                              <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                             ) : (
-                              <ChevronRight className="h-4 w-4" />
+                              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                             )}
                             {expandedTeams[teamKey] ? (
-                              <FolderOpen className="h-4 w-4" />
+                              <FolderOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                             ) : (
-                              <Folder className="h-4 w-4" />
+                              <Folder className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                             )}
-                            <h4 className="font-semibold text-foreground/90">{teamName}</h4>
+                            <h4 className="font-semibold text-foreground/90 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{teamName}</h4>
                             {mvp && (
-                              <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">
-                                MVP: {mvp.name} ({mvp.kills} kills)
+                              <Badge className="bg-yellow-500/20 text-yellow-400 text-[10px] sm:text-xs px-1.5 py-0.5">
+                                MVP: {mvp.name}
                               </Badge>
                             )}
-                            {topDamage && topDamage.name !== mvp?.name && (
-                              <Badge className="bg-red-500/20 text-red-400 text-xs">
-                                Top DMG: {topDamage.name} ({topDamage.damage})
-                              </Badge>
-                            )}
-                            <Badge variant="outline" className="ml-auto text-xs">
-                              {teamScreenshots.length} screenshots
+                            <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">
+                              {teamScreenshots.length}
                             </Badge>
                           </div>
                         </CollapsibleTrigger>
                         
-                        <CollapsibleContent className="mt-2 ml-6">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <CollapsibleContent className="mt-2 ml-2 sm:ml-6">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                             {teamScreenshots.map((screenshot) => (
-                              <div key={screenshot.id} className="border border-primary/30 rounded-lg p-2 bg-secondary/50">
+                              <div key={screenshot.id} className="border border-primary/30 rounded-lg p-1.5 sm:p-2 bg-secondary/50">
                                 <img
                                   src={screenshot.screenshot_url}
                                   alt={`Match ${screenshot.match_number}`}
-                                  className="w-full h-32 object-cover rounded mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                                  className="w-full h-20 sm:h-32 object-cover rounded mb-1.5 sm:mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                                   onClick={() => setSelectedImage(screenshot)}
                                 />
-                                <div className="space-y-1 text-xs">
+                                <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs">
                                   <p className="font-semibold">Match #{screenshot.match_number}</p>
                                   {screenshot.placement && (
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-xs">Rank: #{screenshot.placement}</Badge>
-                                      <Badge variant="outline" className="text-xs">{screenshot.kills} kills</Badge>
+                                    <div className="flex flex-wrap items-center gap-1">
+                                      <Badge variant="outline" className="text-[9px] sm:text-xs px-1 py-0">#{screenshot.placement}</Badge>
+                                      <Badge variant="outline" className="text-[9px] sm:text-xs px-1 py-0">{screenshot.kills}k</Badge>
                                     </div>
                                   )}
                                   {screenshot.points && (
-                                    <p className="font-bold text-primary">{screenshot.points} pts</p>
+                                    <p className="font-bold text-primary text-xs sm:text-sm">{screenshot.points} pts</p>
                                   )}
                                 </div>
                                 {isAdmin && (
-                                  <div className="flex gap-2 mt-2">
+                                  <div className="flex gap-1 sm:gap-2 mt-1.5 sm:mt-2">
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="flex-1"
+                                      className="flex-1 h-7 sm:h-8 text-[10px] sm:text-xs px-1.5 sm:px-2"
                                       onClick={() => handleEditClick(screenshot)}
                                     >
-                                      <Edit className="h-3 w-3 mr-1" />
-                                      Edit
+                                      <Edit className="h-3 w-3 sm:mr-1" />
+                                      <span className="hidden sm:inline">Edit</span>
                                     </Button>
                                     <Button
                                       variant="destructive"
                                       size="sm"
-                                      className="flex-1"
+                                      className="flex-1 h-7 sm:h-8 text-[10px] sm:text-xs px-1.5 sm:px-2"
                                       onClick={() => setDeleteId(screenshot.id)}
                                     >
-                                      <Trash2 className="h-3 w-3 mr-1" />
-                                      Delete
+                                      <Trash2 className="h-3 w-3 sm:mr-1" />
+                                      <span className="hidden sm:inline">Delete</span>
                                     </Button>
                                   </div>
                                 )}
@@ -357,16 +352,16 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
       </Card>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Screenshot?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Delete Screenshot?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               This action cannot be undone. This will permanently delete the screenshot and its data.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground w-full sm:w-auto">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -374,21 +369,23 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
       </AlertDialog>
 
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl w-full">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl w-full p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {selectedImage && (
-                <div className="flex items-center gap-4">
-                  <span>{(selectedImage.teams as any)?.name}</span>
-                  <Badge variant="outline">Match #{selectedImage.match_number}</Badge>
-                  <Badge variant="outline">Day {selectedImage.day}</Badge>
-                  {selectedImage.placement && (
-                    <>
-                      <Badge>Rank: #{selectedImage.placement}</Badge>
-                      <Badge>{selectedImage.kills} kills</Badge>
-                      <Badge className="bg-primary">{selectedImage.points} pts</Badge>
-                    </>
-                  )}
+                <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
+                  <span className="font-bold">{(selectedImage.teams as any)?.name}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="outline" className="text-xs">Match #{selectedImage.match_number}</Badge>
+                    <Badge variant="outline" className="text-xs">Day {selectedImage.day}</Badge>
+                    {selectedImage.placement && (
+                      <>
+                        <Badge className="text-xs">#{selectedImage.placement}</Badge>
+                        <Badge className="text-xs">{selectedImage.kills}k</Badge>
+                        <Badge className="bg-primary text-xs">{selectedImage.points} pts</Badge>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </DialogTitle>
@@ -397,21 +394,21 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
             <img
               src={selectedImage.screenshot_url}
               alt={`Match ${selectedImage.match_number}`}
-              className="w-full h-auto rounded-lg"
+              className="w-full h-auto rounded-lg max-h-[70vh] object-contain"
             />
           )}
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!editingScreenshot} onOpenChange={() => setEditingScreenshot(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Screenshot Data</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Edit Screenshot Data</DialogTitle>
           </DialogHeader>
           {editingScreenshot && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="placement">Placement</Label>
+                <Label htmlFor="placement" className="text-sm">Placement</Label>
                 <Input
                   id="placement"
                   type="number"
@@ -419,29 +416,31 @@ const TeamScreenshotExplorer = ({ selectedTournament, userId }: TeamScreenshotEx
                   max="32"
                   value={editPlacement}
                   onChange={(e) => setEditPlacement(parseInt(e.target.value) || 0)}
+                  className="h-10"
                 />
               </div>
               <div>
-                <Label htmlFor="kills">Kills</Label>
+                <Label htmlFor="kills" className="text-sm">Kills</Label>
                 <Input
                   id="kills"
                   type="number"
                   min="0"
                   value={editKills}
                   onChange={(e) => setEditKills(parseInt(e.target.value) || 0)}
+                  className="h-10"
                 />
               </div>
               <div className="p-3 bg-secondary rounded-lg">
-                <p className="text-sm text-muted-foreground">Calculated Points:</p>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-xs sm:text-sm text-muted-foreground">Calculated Points:</p>
+                <p className="text-xl sm:text-2xl font-bold text-primary">
                   {calculatePoints(editPlacement, editKills)} pts
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleEditSave} className="flex-1">
+                <Button onClick={handleEditSave} className="flex-1 h-10">
                   Save Changes
                 </Button>
-                <Button variant="outline" onClick={() => setEditingScreenshot(null)} className="flex-1">
+                <Button variant="outline" onClick={() => setEditingScreenshot(null)} className="flex-1 h-10">
                   Cancel
                 </Button>
               </div>

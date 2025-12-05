@@ -122,40 +122,40 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-background/80">
-      <Card className="w-full max-w-md p-6 md:p-8 border-primary/30 shadow-card bg-card/95 backdrop-blur">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-3 tracking-tight">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-background via-background to-background/80">
+      <Card className="w-full max-w-md p-5 sm:p-6 md:p-8 border-primary/30 shadow-card bg-card/95 backdrop-blur animate-fade-in">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2 sm:mb-3 tracking-tight">
             PUBG MOBILE
           </h1>
-          <p className="text-muted-foreground text-lg">Esports Point Tracker</p>
+          <p className="text-muted-foreground text-sm sm:text-lg">Esports Point Tracker</p>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-5 sm:mb-6">
           <Button
             onClick={handlePlayerAccess}
             disabled={loading}
-            className="w-full bg-gradient-primary hover:shadow-glow h-14 text-lg font-semibold transition-all duration-300"
+            className="w-full bg-gradient-primary hover:shadow-glow h-12 sm:h-14 text-base sm:text-lg font-semibold transition-all duration-300"
           >
-            <Upload className="mr-2 h-5 w-5" />
+            <Upload className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Screenshot Submit
           </Button>
-          <p className="text-xs text-muted-foreground text-center mt-2">
+          <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2">
             Upload your match screenshots
           </p>
         </div>
 
-        <div className="relative my-6">
+        <div className="relative my-5 sm:my-6">
           <Separator className="bg-border" />
-          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-[10px] sm:text-xs text-muted-foreground">
             OR
           </span>
         </div>
 
-        <form onSubmit={handleAccessCode} className="space-y-4">
+        <form onSubmit={handleAccessCode} className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="access-code" className="flex items-center gap-2 text-sm">
-              <Shield className="h-4 w-4 text-primary" />
+            <Label htmlFor="access-code" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
               Admin Access Code
             </Label>
             <Input
@@ -165,10 +165,10 @@ const Auth = () => {
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
               required
-              className="bg-input border-border uppercase text-center text-lg tracking-widest h-12 font-semibold"
+              className="bg-input border-border uppercase text-center text-sm sm:text-lg tracking-widest h-10 sm:h-12 font-semibold"
               maxLength={20}
             />
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
               For administrators only
             </p>
           </div>
@@ -176,7 +176,7 @@ const Auth = () => {
             type="submit"
             disabled={loading}
             variant="outline"
-            className="w-full border-primary/50 hover:bg-primary/10 h-12 font-semibold"
+            className="w-full border-primary/50 hover:bg-primary/10 h-10 sm:h-12 font-semibold text-sm sm:text-base"
           >
             {loading ? "Validating..." : "Admin Login"}
           </Button>
