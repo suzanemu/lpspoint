@@ -60,7 +60,7 @@ const Standings = ({
     <div className="bg-[hsl(220_20%_12%)] rounded-lg p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
-          <h3 className="text-xs sm:text-sm text-muted-foreground uppercase tracking-wider mb-1">Season 1</h3>
+          <h3 className="text-xs sm:text-sm text-muted-foreground uppercase tracking-wider mb-1">{tournamentName}</h3>
           <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-primary uppercase tracking-wider">Overall Standings</h2>
         </div>
         {isAdmin && (
