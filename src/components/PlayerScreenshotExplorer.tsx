@@ -161,7 +161,7 @@ const PlayerScreenshotExplorer = ({ screenshots }: PlayerScreenshotExplorerProps
                         <h4 className="font-semibold text-foreground/90 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{teamName}</h4>
                         {mvp && (
                           <Badge className="bg-yellow-500/20 text-yellow-400 text-[10px] sm:text-xs px-1.5 py-0.5">
-                            MVP: {mvp.name} <span className="hidden sm:inline">({mvp.kills} kills)</span>
+                            MVP: {mvp.name} ({mvp.kills})
                           </Badge>
                         )}
                         <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">
