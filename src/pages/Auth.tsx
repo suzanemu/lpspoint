@@ -17,7 +17,7 @@ const Auth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        navigate("/dashboard");
       }
     });
   }, [navigate]);
@@ -71,7 +71,7 @@ const Auth = () => {
       }
 
       toast.success(`Welcome ${codeData.role}!`);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Access code error:", error);
       toast.error("An unexpected error occurred");
@@ -112,7 +112,7 @@ const Auth = () => {
       }
 
       toast.success("Welcome! You can now submit screenshots.");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Player access error:", error);
       toast.error("An unexpected error occurred");
