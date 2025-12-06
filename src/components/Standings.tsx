@@ -79,10 +79,10 @@ const Standings = ({
               <div className="bg-amber-500 rounded-full p-1.5 sm:p-2 shrink-0">
                 <Target className="h-4 w-4 sm:h-5 sm:w-5 text-black" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs text-amber-400 uppercase tracking-wider font-semibold">MVP - Highest Kills</p>
                 <p className="text-sm sm:text-lg font-bold text-foreground truncate">{mvpPlayer.player_name}</p>
-                <p className="text-xs sm:text-sm text-amber-400">{mvpPlayer.total_kills} Total Kills</p>
+                <p className="text-xs sm:text-sm text-amber-400">{mvpPlayer.total_kills} Kills</p>
               </div>
             </div>
           </div>
