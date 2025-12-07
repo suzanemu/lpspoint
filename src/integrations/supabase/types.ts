@@ -208,6 +208,48 @@ export type Database = {
           },
         ]
       }
+      tournament_history: {
+        Row: {
+          archived_at: string
+          created_at: string | null
+          id: string
+          mvp_matches_count: number | null
+          mvp_player_name: string | null
+          mvp_total_kills: number | null
+          original_tournament_id: string | null
+          standings: Json
+          total_matches: number
+          tournament_description: string | null
+          tournament_name: string
+        }
+        Insert: {
+          archived_at?: string
+          created_at?: string | null
+          id?: string
+          mvp_matches_count?: number | null
+          mvp_player_name?: string | null
+          mvp_total_kills?: number | null
+          original_tournament_id?: string | null
+          standings?: Json
+          total_matches?: number
+          tournament_description?: string | null
+          tournament_name: string
+        }
+        Update: {
+          archived_at?: string
+          created_at?: string | null
+          id?: string
+          mvp_matches_count?: number | null
+          mvp_player_name?: string | null
+          mvp_total_kills?: number | null
+          original_tournament_id?: string | null
+          standings?: Json
+          total_matches?: number
+          tournament_description?: string | null
+          tournament_name?: string
+        }
+        Relationships: []
+      }
       tournaments: {
         Row: {
           created_at: string | null

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Shield, Trophy, ChevronDown } from "lucide-react";
+import { Camera, Shield, Trophy, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,13 +10,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Team, Tournament } from "@/types/tournament";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface PlayerStat {
   player_name: string;
   total_kills: number;
   total_damage: number;
   matches_count: number;
+}
+
+interface TournamentHistory {
+  id: string;
+  tournament_name: string;
+  standings: any[];
+  mvp_player_name: string | null;
+  mvp_total_kills: number;
+  mvp_matches_count: number;
+  archived_at: string;
 }
 
 const Home = () => {
@@ -26,9 +38,15 @@ const Home = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"current" | "history">("current");
+  const [tournamentHistory, setTournamentHistory] = useState<TournamentHistory[]>([]);
+  const [selectedHistory, setSelectedHistory] = useState<string>("");
+  const [historyTeams, setHistoryTeams] = useState<Team[]>([]);
+  const [historyMvp, setHistoryMvp] = useState<PlayerStat | null>(null);
 
   useEffect(() => {
     fetchTournaments();
+    fetchTournamentHistory();
   }, []);
 
   useEffect(() => {
@@ -37,6 +55,25 @@ const Home = () => {
       fetchPlayerStats();
     }
   }, [selectedTournament]);
+
+  useEffect(() => {
+    if (selectedHistory) {
+      const history = tournamentHistory.find(h => h.id === selectedHistory);
+      if (history) {
+        setHistoryTeams(history.standings as Team[]);
+        if (history.mvp_player_name) {
+          setHistoryMvp({
+            player_name: history.mvp_player_name,
+            total_kills: history.mvp_total_kills,
+            total_damage: 0,
+            matches_count: history.mvp_matches_count,
+          });
+        } else {
+          setHistoryMvp(null);
+        }
+      }
+    }
+  }, [selectedHistory, tournamentHistory]);
 
   const fetchTournaments = async () => {
     const { data, error } = await supabase
@@ -55,6 +92,33 @@ const Home = () => {
       setSelectedTournament(data[0].id);
     }
     setLoading(false);
+  };
+
+  const fetchTournamentHistory = async () => {
+    const { data, error } = await supabase
+      .from("tournament_history")
+      .select("*")
+      .order("archived_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching tournament history:", error);
+      return;
+    }
+
+    const mappedHistory: TournamentHistory[] = (data || []).map((item) => ({
+      id: item.id,
+      tournament_name: item.tournament_name,
+      standings: Array.isArray(item.standings) ? item.standings : [],
+      mvp_player_name: item.mvp_player_name,
+      mvp_total_kills: item.mvp_total_kills || 0,
+      mvp_matches_count: item.mvp_matches_count || 0,
+      archived_at: item.archived_at,
+    }));
+
+    setTournamentHistory(mappedHistory);
+    if (mappedHistory.length > 0) {
+      setSelectedHistory(mappedHistory[0].id);
+    }
   };
 
   const fetchTeams = async () => {
@@ -165,6 +229,13 @@ const Home = () => {
   };
 
   const currentTournament = tournaments.find((t) => t.id === selectedTournament);
+  const currentHistory = tournamentHistory.find((h) => h.id === selectedHistory);
+
+  const displayTeams = activeTab === "current" ? teams : historyTeams;
+  const displayMvp = activeTab === "current" ? mvpPlayer : historyMvp;
+  const displayName = activeTab === "current" 
+    ? (currentTournament?.name || "PUBG Tournament")
+    : (currentHistory?.tournament_name || "Tournament History");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -176,10 +247,11 @@ const Home = () => {
               <Trophy className="h-5 w-5 text-primary" />
             </div>
             <span className="text-lg font-bold uppercase tracking-wider text-foreground">
-              {currentTournament?.name || "PUBG Tournament"}
+              {displayName}
             </span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
@@ -205,18 +277,34 @@ const Home = () => {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:py-8">
+        {/* Tabs for Current and History */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "current" | "history")} className="mb-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="current" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              Current Tournament
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              History
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Hero Section */}
         <div className="border border-primary/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 bg-card/30">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-primary uppercase tracking-wider">
-                {currentTournament?.name || "Tournament"}
+                {displayName}
               </h1>
               <p className="text-muted-foreground text-sm sm:text-base mt-1">
-                Real-time performance metrics & standings
+                {activeTab === "current" 
+                  ? "Real-time performance metrics & standings"
+                  : "Past tournament standings & records"}
               </p>
             </div>
-            {tournaments.length > 0 && (
+            {activeTab === "current" && tournaments.length > 0 && (
               <Select value={selectedTournament} onValueChange={setSelectedTournament}>
                 <SelectTrigger className="w-full sm:w-[200px] bg-card border-border">
                   <SelectValue placeholder="Select tournament" />
@@ -230,6 +318,20 @@ const Home = () => {
                 </SelectContent>
               </Select>
             )}
+            {activeTab === "history" && tournamentHistory.length > 0 && (
+              <Select value={selectedHistory} onValueChange={setSelectedHistory}>
+                <SelectTrigger className="w-full sm:w-[250px] bg-card border-border">
+                  <SelectValue placeholder="Select past tournament" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tournamentHistory.map((history) => (
+                    <SelectItem key={history.id} value={history.id}>
+                      {history.tournament_name} - {new Date(history.archived_at).toLocaleDateString()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
@@ -238,7 +340,7 @@ const Home = () => {
           {/* Standings Table */}
           <div className="lg:col-span-2">
             <h2 className="text-xl sm:text-2xl font-bold text-primary uppercase tracking-wider mb-4">
-              Current Standings
+              {activeTab === "current" ? "Current Standings" : "Final Standings"}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full border-separate border-spacing-y-1 min-w-[500px]">
@@ -254,13 +356,13 @@ const Home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {teams.slice(0, 10).map((team, index) => {
+                  {displayTeams.slice(0, 10).map((team, index) => {
                     const rank = index + 1;
                     const isTopThree = rank <= 3;
 
                     return (
                       <tr
-                        key={team.id}
+                        key={team.id || index}
                         className={`${
                           isTopThree
                             ? "bg-card border-l-4 border-l-primary"
@@ -318,10 +420,10 @@ const Home = () => {
                       </tr>
                     );
                   })}
-                  {teams.length === 0 && (
+                  {displayTeams.length === 0 && (
                     <tr>
                       <td colSpan={7} className="text-center py-12 text-muted-foreground">
-                        No teams registered yet
+                        {activeTab === "current" ? "No teams registered yet" : "No archived tournaments found"}
                       </td>
                     </tr>
                   )}
@@ -349,7 +451,7 @@ const Home = () => {
                   MVP
                 </p>
                 <h3 className="text-2xl sm:text-4xl font-bold text-foreground uppercase tracking-wider">
-                  {mvpPlayer?.player_name || "TBD"}
+                  {displayMvp?.player_name || "TBD"}
                 </h3>
               </div>
 
@@ -357,7 +459,7 @@ const Home = () => {
               <div className="grid grid-cols-2 border-t border-primary/30 bg-primary/10">
                 <div className="text-center py-4 border-r border-primary/30">
                   <p className="text-xl sm:text-3xl font-bold text-primary">
-                    {mvpPlayer?.total_kills || 0}
+                    {displayMvp?.total_kills || 0}
                   </p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">
                     Kills
@@ -365,7 +467,7 @@ const Home = () => {
                 </div>
                 <div className="text-center py-4">
                   <p className="text-xl sm:text-3xl font-bold text-foreground">
-                    {mvpPlayer?.matches_count || 0}
+                    {displayMvp?.matches_count || 0}
                   </p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">
                     Matches
