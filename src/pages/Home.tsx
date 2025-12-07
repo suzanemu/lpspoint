@@ -107,7 +107,12 @@ const Home = () => {
         };
       });
 
-      setTeams(teamsWithStats.sort((a, b) => b.totalPoints - a.totalPoints));
+      setTeams(teamsWithStats.sort((a, b) => {
+        if (b.totalPoints !== a.totalPoints) {
+          return b.totalPoints - a.totalPoints;
+        }
+        return b.placementPoints - a.placementPoints;
+      }));
     }
   };
 
