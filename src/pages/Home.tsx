@@ -354,21 +354,13 @@ const Home = () => {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 border-t border-primary/30 bg-primary/10">
+              <div className="grid grid-cols-2 border-t border-primary/30 bg-primary/10">
                 <div className="text-center py-4 border-r border-primary/30">
                   <p className="text-xl sm:text-3xl font-bold text-primary">
                     {mvpPlayer?.total_kills || 0}
                   </p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">
                     Kills
-                  </p>
-                </div>
-                <div className="text-center py-4 border-r border-primary/30">
-                  <p className="text-xl sm:text-3xl font-bold text-primary">
-                    {mvpPlayer?.total_damage || 0}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">
-                    Damage
                   </p>
                 </div>
                 <div className="text-center py-4">
