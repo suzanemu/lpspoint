@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -178,15 +178,24 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
             </h1>
             <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage teams and view standings</p>
           </div>
-          <Button
-            onClick={handleSignOut}
-            variant="outline"
-            className="border-primary/50 hover:bg-primary/10 shrink-0"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-            <span className="sm:hidden">Logout</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              className="border-primary/50 hover:bg-primary/10 shrink-0"
+            >
+              <Home className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="border-primary/50 hover:bg-primary/10 shrink-0"
+            >
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </div>
         </div>
 
         {tournaments.length > 0 && (

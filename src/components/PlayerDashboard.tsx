@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, LogOut, Loader2, Trophy } from "lucide-react";
+import { Upload, LogOut, Loader2, Trophy, Home } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Standings from "./Standings";
@@ -402,15 +402,26 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
             </h1>
             <p className="text-muted-foreground mt-1 sm:mt-2 text-xs sm:text-base">Upload your match screenshots</p>
           </div>
-          <Button
-            onClick={handleSignOut}
-            variant="outline"
-            size="sm"
-            className="border-primary/50 hover:bg-primary/10 shrink-0"
-          >
-            <LogOut className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              size="sm"
+              className="border-primary/50 hover:bg-primary/10 shrink-0"
+            >
+              <Home className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              size="sm"
+              className="border-primary/50 hover:bg-primary/10 shrink-0"
+            >
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </div>
         </div>
 
         {tournament && (
