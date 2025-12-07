@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Standings from "./Standings";
 import PlayerScreenshotExplorer from "./PlayerScreenshotExplorer";
+import ThemeToggle from "./ThemeToggle";
 import { Team, Tournament } from "@/types/tournament";
 
 interface PlayerDashboardProps {
@@ -403,6 +404,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
             <p className="text-muted-foreground mt-1 sm:mt-2 text-xs sm:text-base">Upload your match screenshots</p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button
               onClick={() => navigate("/")}
               variant="outline"

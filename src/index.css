@@ -59,6 +59,55 @@ All colors MUST be HSL.
     --sidebar-ring: 28 100% 55%;
   }
 
+  .light {
+    /* Light Theme - Clean and Professional */
+    --background: 0 0% 98%;
+    --foreground: 220 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+
+    /* Primary: Bold Orange/Gold */
+    --primary: 28 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 35 100% 50%;
+
+    /* Secondary */
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 20% 15%;
+
+    --muted: 220 10% 90%;
+    --muted-foreground: 220 10% 40%;
+
+    --accent: 28 90% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 85%;
+    --input: 220 15% 92%;
+    --ring: 28 100% 45%;
+
+    /* Custom Gaming Design Tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(28 100% 45%), hsl(35 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 15% 95%));
+    --shadow-glow: 0 0 30px hsl(28 100% 45% / 0.2);
+    --shadow-card: 0 10px 40px hsl(220 20% 15% / 0.1);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 28 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 92%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 220 15% 85%;
+    --sidebar-ring: 28 100% 45%;
+  }
+
   .dark {
     --background: 220 20% 8%;
     --foreground: 0 0% 98%;

@@ -10,6 +10,7 @@ import TournamentManager from "./TournamentManager";
 import TeamScreenshotExplorer from "./TeamScreenshotExplorer";
 import Standings from "./Standings";
 import ManualPointEntry from "./ManualPointEntry";
+import ThemeToggle from "./ThemeToggle";
 import { Team, Tournament } from "@/types/tournament";
 
 interface AdminDashboardProps {
@@ -179,6 +180,7 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
             <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage teams and view standings</p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button
               onClick={() => navigate("/")}
               variant="outline"
