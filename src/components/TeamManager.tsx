@@ -66,7 +66,7 @@ export default function TeamManager() {
 
     const teamNames = bulkTeamNames
       .split(/[\n,]/)
-      .map(name => name.trim().replace(/[^a-zA-Z0-9\s]/g, ''))
+      .map(name => name.trim().replace(/^[\d]+[.\-)\]:\s]+/, '').replace(/[^a-zA-Z0-9\s]/g, '').trim())
       .filter(name => name.length > 0);
 
     if (teamNames.length === 0) {
