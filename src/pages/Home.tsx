@@ -356,7 +356,7 @@ const Home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayTeams.slice(0, 10).map((team, index) => {
+                  {displayTeams.map((team, index) => {
                     const rank = index + 1;
                     const isTopThree = rank <= 3;
 
