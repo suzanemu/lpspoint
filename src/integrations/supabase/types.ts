@@ -285,6 +285,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       validate_access_code: {
         Args: { input_code: string }
         Returns: {
