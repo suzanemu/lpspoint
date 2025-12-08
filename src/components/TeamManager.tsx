@@ -64,17 +64,32 @@ export default function TeamManager() {
       return;
     }
 
+    // Get existing team names for this tournament
+    const existingNames = teams.map(t => t.name.toLowerCase());
+
     const teamNames = bulkTeamNames
       .split(/[\n,]/)
-      .map(name => name.trim().replace(/^[\d]+[.\-)\]:\s]+/, '').replace(/[^a-zA-Z0-9\s]/g, '').trim())
-      .filter(name => name.length > 0);
+      .map(name => {
+        // Strip leading numbers and any non-letter characters after them
+        let cleaned = name.trim().replace(/^\d+[^a-zA-Z]*/, '');
+        // Keep only letters, numbers, and spaces
+        cleaned = cleaned.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+        // Collapse multiple spaces into one
+        cleaned = cleaned.replace(/\s+/g, ' ');
+        return cleaned;
+      })
+      .filter(name => name.length > 0)
+      .filter(name => !existingNames.includes(name.toLowerCase()));
 
     if (teamNames.length === 0) {
-      toast.error("No valid team names found");
+      toast.error("No new team names found");
       return;
     }
 
-    const teamsToInsert = teamNames.map(name => ({
+    // Remove duplicates from the list itself
+    const uniqueTeamNames = [...new Set(teamNames)];
+
+    const teamsToInsert = uniqueTeamNames.map(name => ({
       name,
       tournament_id: selectedTournament
     }));
@@ -83,8 +98,9 @@ export default function TeamManager() {
 
     if (error) {
       toast.error("Failed to add teams");
+      console.error("Bulk insert error:", error);
     } else {
-      toast.success(`${teamNames.length} teams added`);
+      toast.success(`${uniqueTeamNames.length} teams added`);
       setBulkTeamNames("");
       setBulkDialogOpen(false);
       fetchTeams();
