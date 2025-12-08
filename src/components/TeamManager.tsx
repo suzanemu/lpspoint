@@ -5,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Upload, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Upload, Image as ImageIcon, Users } from "lucide-react";
 import { Tournament } from "@/types/tournament";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function TeamManager() {
   const [teams, setTeams] = useState<any[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<string>("");
   const [newTeamName, setNewTeamName] = useState("");
-
+  const [bulkTeamNames, setBulkTeamNames] = useState("");
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   useEffect(() => {
     fetchTournaments();
   }, []);
@@ -51,6 +54,39 @@ export default function TeamManager() {
     } else {
       toast.success("Team added");
       setNewTeamName("");
+      fetchTeams();
+    }
+  };
+
+  const handleBulkAddTeams = async () => {
+    if (!bulkTeamNames.trim() || !selectedTournament) {
+      toast.error("Please enter team names");
+      return;
+    }
+
+    const teamNames = bulkTeamNames
+      .split(/[\n,]/)
+      .map(name => name.trim())
+      .filter(name => name.length > 0);
+
+    if (teamNames.length === 0) {
+      toast.error("No valid team names found");
+      return;
+    }
+
+    const teamsToInsert = teamNames.map(name => ({
+      name,
+      tournament_id: selectedTournament
+    }));
+
+    const { error } = await supabase.from("teams").insert(teamsToInsert);
+
+    if (error) {
+      toast.error("Failed to add teams");
+    } else {
+      toast.success(`${teamNames.length} teams added`);
+      setBulkTeamNames("");
+      setBulkDialogOpen(false);
       fetchTeams();
     }
   };
@@ -131,6 +167,30 @@ export default function TeamManager() {
         <Button onClick={handleAddTeam}>
           <Plus className="h-4 w-4" />
         </Button>
+        <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <Users className="h-4 w-4 mr-1" />
+              Bulk
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Teams in Bulk</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                value={bulkTeamNames}
+                onChange={(e) => setBulkTeamNames(e.target.value)}
+                placeholder="Enter team names (one per line or comma-separated)"
+                rows={8}
+              />
+              <Button onClick={handleBulkAddTeams} className="w-full">
+                Add Teams
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="space-y-2">
