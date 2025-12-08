@@ -28,11 +28,12 @@ const Standings = ({
   });
 
   const downloadCSV = () => {
-    const csvHeaders = "Rank,Team Name,Total Points,Placement Points,Kill Points,Total Kills,Matches Played,First Place Wins\n";
+    const csvHeaders = "Rank,Team Name,Logo URL,Total Points,Placement Points,Kill Points,Total Kills,Matches Played,First Place Wins\n";
     const csvRows = sortedTeams.map((team, index) => {
       return [
         index + 1,
         `"${team.name}"`,
+        `"${team.logo_url || ''}"`,
         team.totalPoints,
         team.placementPoints,
         team.killPoints,
