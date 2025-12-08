@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home } from "lucide-react";
+import { LogOut, Home, Camera, CameraOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import Standings from "./Standings";
 import ManualPointEntry from "./ManualPointEntry";
 import ThemeToggle from "./ThemeToggle";
 import { Team, Tournament } from "@/types/tournament";
+import { toast } from "sonner";
 
 interface AdminDashboardProps {
   userId: string;
@@ -27,6 +28,8 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<string>("");
+  const [submissionsEnabled, setSubmissionsEnabled] = useState<boolean>(true);
+  const [togglingSubmissions, setTogglingSubmissions] = useState(false);
 
   useEffect(() => {
     fetchTournaments();
@@ -36,6 +39,7 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
     if (selectedTournament) {
       fetchTeams();
       fetchPlayerStats();
+      fetchSubmissionStatus();
       const interval = setInterval(() => {
         fetchTeams();
         fetchPlayerStats();
@@ -43,6 +47,41 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
       return () => clearInterval(interval);
     }
   }, [selectedTournament]);
+
+  const fetchSubmissionStatus = async () => {
+    if (!selectedTournament) return;
+    
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select("screenshot_submissions_enabled")
+      .eq("id", selectedTournament)
+      .single();
+    
+    if (!error && data) {
+      setSubmissionsEnabled(data.screenshot_submissions_enabled ?? true);
+    }
+  };
+
+  const toggleSubmissions = async () => {
+    if (!selectedTournament) return;
+    
+    setTogglingSubmissions(true);
+    const newValue = !submissionsEnabled;
+    
+    const { error } = await supabase
+      .from("tournaments")
+      .update({ screenshot_submissions_enabled: newValue })
+      .eq("id", selectedTournament);
+    
+    if (error) {
+      toast.error("Failed to update submission status");
+      console.error("Toggle error:", error);
+    } else {
+      setSubmissionsEnabled(newValue);
+      toast.success(newValue ? "Screenshot submissions enabled" : "Screenshot submissions disabled");
+    }
+    setTogglingSubmissions(false);
+  };
 
   const fetchTournaments = async () => {
     const { data, error } = await supabase
@@ -179,7 +218,27 @@ const AdminDashboard = ({ userId }: AdminDashboardProps) => {
             </h1>
             <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage teams and view standings</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            {selectedTournament && (
+              <Button
+                onClick={toggleSubmissions}
+                variant={submissionsEnabled ? "default" : "destructive"}
+                className="shrink-0"
+                disabled={togglingSubmissions}
+              >
+                {submissionsEnabled ? (
+                  <>
+                    <Camera className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Submissions On</span>
+                  </>
+                ) : (
+                  <>
+                    <CameraOff className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Submissions Off</span>
+                  </>
+                )}
+              </Button>
+            )}
             <ThemeToggle />
             <Button
               onClick={() => navigate("/")}
