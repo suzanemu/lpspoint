@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, LogOut, Loader2, Trophy, Home } from "lucide-react";
+import { Upload, LogOut, Loader2, Trophy, Home, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Standings from "./Standings";
@@ -36,6 +36,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   const [uploadedMatches, setUploadedMatches] = useState<number>(0);
   const [allScreenshots, setAllScreenshots] = useState<any[]>([]);
   const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
+  const [submissionsEnabled, setSubmissionsEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     fetchTournamentAndTeams();
@@ -45,11 +46,13 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
     if (tournament?.id) {
       fetchAllScreenshots();
       fetchPlayerStats();
+      fetchSubmissionStatus();
       const interval = setInterval(() => {
         fetchTeams();
         fetchUploadedMatches();
         fetchAllScreenshots();
         fetchPlayerStats();
+        fetchSubmissionStatus();
       }, 5000);
       return () => clearInterval(interval);
     }
@@ -61,10 +64,11 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (tournamentData) {
       setTournament(tournamentData);
+      setSubmissionsEnabled(tournamentData.screenshot_submissions_enabled ?? true);
 
       const { data: teamsData } = await supabase
         .from("teams")
@@ -79,6 +83,20 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
       }
 
       fetchTeams();
+    }
+  };
+
+  const fetchSubmissionStatus = async () => {
+    if (!tournament?.id) return;
+    
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select("screenshot_submissions_enabled")
+      .eq("id", tournament.id)
+      .single();
+    
+    if (!error && data) {
+      setSubmissionsEnabled(data.screenshot_submissions_enabled ?? true);
     }
   };
 
@@ -219,6 +237,11 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
     const files = Array.from(e.target.files || []);
 
     if (files.length === 0) {
+      return;
+    }
+
+    if (!submissionsEnabled) {
+      toast.error("Screenshot submissions are currently disabled by the admin");
       return;
     }
 
@@ -519,45 +542,59 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="screenshot" className="text-sm">Upload Screenshots (Max 4)</Label>
-              <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 sm:p-8 text-center hover:border-primary/50 transition-colors">
-                <input
-                  id="screenshot"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileUpload}
-                  disabled={!selectedTeamId || uploading || analyzing || !canUploadMore}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="screenshot"
-                  className="cursor-pointer flex flex-col items-center gap-2"
-                >
-                  {uploading || analyzing ? (
-                    <>
-                      <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 text-primary animate-spin" />
-                      <p className="text-sm sm:text-lg font-semibold">
-                        {uploadProgress || (uploading ? "Uploading..." : "Analyzing with AI...")}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Please wait while we process your screenshots
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
-                      <p className="text-sm sm:text-lg font-semibold">
-                        Tap to upload screenshots (up to 4)
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {canUploadMore
-                          ? "AI will auto-extract placement and kills"
-                          : "You have uploaded all allowed matches"}
-                      </p>
-                    </>
-                  )}
-                </label>
-              </div>
+              {!submissionsEnabled ? (
+                <div className="border-2 border-dashed border-destructive/30 rounded-lg p-4 sm:p-8 text-center bg-destructive/5">
+                  <div className="flex flex-col items-center gap-2">
+                    <XCircle className="h-8 w-8 sm:h-12 sm:w-12 text-destructive" />
+                    <p className="text-sm sm:text-lg font-semibold text-destructive">
+                      Submissions Disabled
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Screenshot submissions are currently disabled by the admin
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 sm:p-8 text-center hover:border-primary/50 transition-colors">
+                  <input
+                    id="screenshot"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    disabled={!selectedTeamId || uploading || analyzing || !canUploadMore}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="screenshot"
+                    className="cursor-pointer flex flex-col items-center gap-2"
+                  >
+                    {uploading || analyzing ? (
+                      <>
+                        <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 text-primary animate-spin" />
+                        <p className="text-sm sm:text-lg font-semibold">
+                          {uploadProgress || (uploading ? "Uploading..." : "Analyzing with AI...")}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          Please wait while we process your screenshots
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
+                        <p className="text-sm sm:text-lg font-semibold">
+                          Tap to upload screenshots (up to 4)
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          {canUploadMore
+                            ? "AI will auto-extract placement and kills"
+                            : "You have uploaded all allowed matches"}
+                        </p>
+                      </>
+                    )}
+                  </label>
+                </div>
+              )}
             </div>
           </div>
         </Card>

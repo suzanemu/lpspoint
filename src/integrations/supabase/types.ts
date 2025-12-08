@@ -257,6 +257,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          screenshot_submissions_enabled: boolean
           total_matches: number
           updated_at: string | null
         }
@@ -266,6 +267,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          screenshot_submissions_enabled?: boolean
           total_matches?: number
           updated_at?: string | null
         }
@@ -275,6 +277,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          screenshot_submissions_enabled?: boolean
           total_matches?: number
           updated_at?: string | null
         }
