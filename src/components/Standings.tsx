@@ -58,7 +58,7 @@ const Standings = ({
   };
 
   return (
-    <div className="bg-[hsl(220_20%_12%)] rounded-lg p-3 sm:p-6">
+    <div className="bg-card rounded-lg p-3 sm:p-6 border border-border">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
           <h3 className="text-xs sm:text-sm text-muted-foreground uppercase tracking-wider mb-1">{tournamentName}</h3>
@@ -125,8 +125,8 @@ const Standings = ({
                   key={team.id} 
                   className={`
                     ${isTopTeam 
-                      ? 'bg-[hsl(220_18%_15%)] border-2 border-primary rounded-lg' 
-                      : 'bg-[hsl(220_18%_10%)]'
+                      ? 'bg-muted/50 border-2 border-primary rounded-lg' 
+                      : 'bg-muted/30'
                     }
                   `}
                 >
