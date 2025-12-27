@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import Standings from "./Standings";
 import PlayerScreenshotExplorer from "./PlayerScreenshotExplorer";
 import ThemeToggle from "./ThemeToggle";
+import TeamPreviewCard from "./TeamPreviewCard";
 import { Team, Tournament } from "@/types/tournament";
 
 interface PlayerDashboardProps {
@@ -20,6 +21,12 @@ interface PlayerDashboardProps {
 interface PlayerStat {
   player_name: string;
   total_kills: number;
+}
+
+interface TeamPlayerStat {
+  player_name: string;
+  total_kills: number;
+  total_damage: number;
 }
 
 const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
@@ -37,6 +44,7 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
   const [allScreenshots, setAllScreenshots] = useState<any[]>([]);
   const [mvpPlayer, setMvpPlayer] = useState<PlayerStat | null>(null);
   const [submissionsEnabled, setSubmissionsEnabled] = useState<boolean>(true);
+  const [teamPlayerStats, setTeamPlayerStats] = useState<Record<string, TeamPlayerStat[]>>({});
 
   useEffect(() => {
     fetchTournamentAndTeams();
@@ -47,12 +55,14 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
       fetchAllScreenshots();
       fetchPlayerStats();
       fetchSubmissionStatus();
+      fetchTeamPlayerStats();
       const interval = setInterval(() => {
         fetchTeams();
         fetchUploadedMatches();
         fetchAllScreenshots();
         fetchPlayerStats();
         fetchSubmissionStatus();
+        fetchTeamPlayerStats();
       }, 5000);
       return () => clearInterval(interval);
     }
@@ -227,6 +237,72 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
 
     setMvpPlayer(mvp);
   };
+
+  const fetchTeamPlayerStats = async () => {
+    if (!tournament?.id) return;
+
+    const { data: teamsData } = await supabase
+      .from("teams")
+      .select("id")
+      .eq("tournament_id", tournament.id);
+
+    if (!teamsData || teamsData.length === 0) return;
+
+    const teamIds = teamsData.map(t => t.id);
+
+    const { data: playerStats, error } = await supabase
+      .from("player_stats")
+      .select("player_name, kills, damage, team_id")
+      .in("team_id", teamIds);
+
+    if (error || !playerStats) return;
+
+    // Group by team and aggregate player stats
+    const statsByTeam: Record<string, Record<string, { kills: number; damage: number }>> = {};
+    
+    playerStats.forEach((stat) => {
+      if (!statsByTeam[stat.team_id]) {
+        statsByTeam[stat.team_id] = {};
+      }
+      const teamStats = statsByTeam[stat.team_id];
+      if (!teamStats[stat.player_name]) {
+        teamStats[stat.player_name] = { kills: 0, damage: 0 };
+      }
+      teamStats[stat.player_name].kills += stat.kills || 0;
+      teamStats[stat.player_name].damage += stat.damage || 0;
+    });
+
+    // Convert to TeamPlayerStat arrays
+    const result: Record<string, TeamPlayerStat[]> = {};
+    Object.entries(statsByTeam).forEach(([teamId, players]) => {
+      result[teamId] = Object.entries(players)
+        .map(([name, stats]) => ({
+          player_name: name,
+          total_kills: stats.kills,
+          total_damage: stats.damage,
+        }))
+        .sort((a, b) => b.total_kills - a.total_kills);
+    });
+
+    setTeamPlayerStats(result);
+  };
+
+  // Get the selected team's full data
+  const selectedTeam = useMemo(() => {
+    return teams.find(t => t.id === selectedTeamId);
+  }, [teams, selectedTeamId]);
+
+  // Get the selected team's logo
+  const selectedTeamLogo = useMemo(() => {
+    return allTeams.find(t => t.id === selectedTeamId)?.logo_url;
+  }, [allTeams, selectedTeamId]);
+
+  // Get the selected team's MVP
+  const selectedTeamMvp = useMemo(() => {
+    const stats = teamPlayerStats[selectedTeamId];
+    if (!stats || stats.length === 0) return null;
+    return stats[0]; // Already sorted by kills desc
+  }, [teamPlayerStats, selectedTeamId]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -539,6 +615,15 @@ const PlayerDashboard = ({ userId }: PlayerDashboardProps) => {
                 />
               </div>
             </div>
+
+            {/* Team Preview Card */}
+            {selectedTeamId && selectedTeam && (
+              <TeamPreviewCard
+                team={selectedTeam}
+                teamMvp={selectedTeamMvp}
+                logoUrl={selectedTeamLogo}
+              />
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="screenshot" className="text-sm">Upload Screenshots (Max 4)</Label>
